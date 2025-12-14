@@ -50,8 +50,16 @@ async function getSuggestedTabs() {
       if (a.pinned !== b.pinned) {
         return a.pinned ? 1 : -1;
       }
-      // Sort by lastAccessed (oldest first)
-      return (a.lastAccessed || 0) - (b.lastAccessed || 0);
+      // Sort by lastAccessed (oldest first), fallback to tab.id if undefined
+      if (typeof a.lastAccessed === "number" && typeof b.lastAccessed === "number") {
+        return a.lastAccessed - b.lastAccessed;
+      } else if (typeof a.lastAccessed === "number") {
+        return -1;
+      } else if (typeof b.lastAccessed === "number") {
+        return 1;
+      } else {
+        return a.id - b.id;
+      }
     });
   
   return suggested;
