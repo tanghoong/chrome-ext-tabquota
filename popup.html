@@ -261,7 +261,8 @@
     <div class="empty-message">No tabs suggested for closing</div>
   </div>
   
-  <button class="btn btn-primary" id="closeFirstThree">Close First 3 Tabs</button>
+  <!-- The label and disabled state of this button should be updated dynamically by popup.js based on the number of suggested tabs -->
+  <button class="btn btn-primary" id="closeFirstThree" disabled aria-label="Close suggested tabs">Close Tabs</button>
   
   <script src="popup.js"></script>
 </body>
