@@ -146,5 +146,11 @@ chrome.tabs.onCreated.addListener(scheduleUpdate);
 chrome.tabs.onRemoved.addListener(scheduleUpdate);
 chrome.tabs.onUpdated.addListener(scheduleUpdate);
 
+// Remove tab listeners when popup is closed
+window.addEventListener('unload', () => {
+  chrome.tabs.onCreated.removeListener(scheduleUpdate);
+  chrome.tabs.onRemoved.removeListener(scheduleUpdate);
+  chrome.tabs.onUpdated.removeListener(scheduleUpdate);
+});
 // Initialize on load
 loadSettings();
