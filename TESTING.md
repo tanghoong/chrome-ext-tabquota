@@ -1,113 +1,113 @@
-# 手動測試指南 (Manual Testing Guide)
+# Manual Testing Guide
 
-## 安裝測試
+## Installation Testing
 
-1. 打開 Chrome 瀏覽器
-2. 輸入 `chrome://extensions/`
-3. 開啟「開發人員模式」
-4. 點擊「載入未封裝項目」
-5. 選擇專案資料夾
-6. 確認擴充功能圖示出現在工具列
+1. Open Chrome browser
+2. Navigate to `chrome://extensions/`
+3. Enable "Developer mode"
+4. Click "Load unpacked"
+5. Select the project folder
+6. Confirm the extension icon appears in the toolbar
 
-## 功能測試清單
+## Feature Testing Checklist
 
-### 1. 基本設定測試
+### 1. Basic Settings Test
 
-- [ ] 點擊擴充功能圖示，彈出視窗正常顯示
-- [ ] 切換「啟用管理」開關，設定應該儲存
-- [ ] 變更「最大分頁數」下拉選單 (10-30)，設定應該儲存
-- [ ] 關閉並重新打開彈出視窗，設定應該保持
+- [ ] Click extension icon, popup displays correctly
+- [ ] Toggle "Enable Management" switch, settings should save
+- [ ] Change "Max Tabs" dropdown (10-30), settings should save
+- [ ] Close and reopen popup, settings should persist
 
-### 2. Badge 顯示測試
+### 2. Badge Display Test
 
-- [ ] Badge 顯示剩餘配額數字
-- [ ] 剩餘配額 > 5: 綠色
-- [ ] 剩餘配額 1-5: 橘色
-- [ ] 剩餘配額 = 0: 紅色
-- [ ] 未啟用時: 灰色
-- [ ] 開啟/關閉分頁時 badge 即時更新
+- [ ] Badge displays remaining quota number
+- [ ] Remaining quota > 5: Green
+- [ ] Remaining quota 1-5: Orange
+- [ ] Remaining quota = 0: Red
+- [ ] When disabled: Gray
+- [ ] Badge updates in real-time when opening/closing tabs
 
-### 3. 配額限制測試
+### 3. Quota Limit Test
 
-- [ ] 設定最大分頁數為 10
-- [ ] 啟用管理功能
-- [ ] 開啟分頁直到達到 10 個
-- [ ] 嘗試開啟第 11 個分頁
-- [ ] 新分頁應該被立即關閉
-- [ ] 應該顯示通知訊息
+- [ ] Set max tabs to 10
+- [ ] Enable management
+- [ ] Open tabs until reaching 10
+- [ ] Try to open the 11th tab
+- [ ] New tab should be immediately closed
+- [ ] Notification message should appear
 
-### 4. 建議關閉清單測試
+### 4. Suggested Close List Test
 
-- [ ] 開啟多個分頁 (含固定分頁)
-- [ ] 打開彈出視窗
-- [ ] 建議清單不包含目前活動分頁
-- [ ] 建議清單優先顯示非固定分頁
-- [ ] 建議清單按最後存取時間排序 (舊的在前)
-- [ ] 點擊「切換」按鈕，應該切換到該分頁
-- [ ] 點擊「關閉」按鈕，應該關閉該分頁
+- [ ] Open multiple tabs (including pinned tabs)
+- [ ] Open popup
+- [ ] Suggested list does not include currently active tab
+- [ ] Suggested list prioritizes non-pinned tabs
+- [ ] Suggested list sorted by last accessed time (oldest first)
+- [ ] Click "Switch" button, should switch to that tab
+- [ ] Click "Close" button, should close that tab
 
-### 5. 一鍵關閉測試
+### 5. Bulk Close Test
 
-- [ ] 建議清單有 3 個以上分頁
-- [ ] 點擊「一鍵關閉前 3 個」按鈕
-- [ ] 應該關閉列表中前 3 個分頁
-- [ ] 剩餘配額數字更新
-- [ ] 建議清單更新
+- [ ] Suggested list has 3 or more tabs
+- [ ] Click "Close First 3 Tabs" button
+- [ ] Should close the first 3 tabs in the list
+- [ ] Remaining quota number updates
+- [ ] Suggested list updates
 
-### 6. 狀態顯示測試
+### 6. Status Display Test
 
-- [ ] 「目前分頁數」正確顯示
-- [ ] 「剩餘名額」正確計算
-- [ ] 即時更新當分頁變化時
+- [ ] "Current Tabs" displays correctly
+- [ ] "Remaining Quota" calculates correctly
+- [ ] Updates in real-time when tabs change
 
-## 預期行為
+## Expected Behavior
 
-### 當啟用管理時：
-- 開啟新分頁時，如果超過配額，新分頁會被立即關閉
-- 顯示通知告知使用者
-- Badge 顯示剩餘配額
+### When Management is Enabled:
+- Opening new tabs beyond quota will immediately close them
+- Notification appears to inform user
+- Badge displays remaining quota
 
-### 當未啟用管理時：
-- 分頁可以自由開啟
-- Badge 仍然顯示剩餘配額但為灰色
-- 不會自動關閉分頁
+### When Management is Disabled:
+- Tabs can be opened freely
+- Badge still displays remaining quota but in gray
+- No automatic tab closure
 
-### 建議關閉清單規則：
-1. 排除目前活動的分頁
-2. 優先顯示非固定分頁
-3. 按最後存取時間排序（最舊的在最前面）
+### Suggested Close List Rules:
+1. Excludes currently active tabs
+2. Prioritizes non-pinned tabs
+3. Sorted by last accessed time (oldest first)
 
-## 測試場景
+## Test Scenarios
 
-### 場景 1: 正常使用流程
-1. 安裝擴充功能
-2. 設定最大分頁數為 15
-3. 啟用管理
-4. 開啟 10 個分頁 → Badge 顯示 5
-5. 再開啟 5 個分頁 → Badge 顯示 0
-6. 嘗試開啟新分頁 → 被關閉並顯示通知
+### Scenario 1: Normal Usage Flow
+1. Install extension
+2. Set max tabs to 15
+3. Enable management
+4. Open 10 tabs → Badge shows 5
+5. Open 5 more tabs → Badge shows 0
+6. Try to open new tab → Closes with notification
 
-### 場景 2: 清理舊分頁
-1. 開啟 20 個分頁
-2. 隨機瀏覽幾個分頁
-3. 打開彈出視窗
-4. 查看建議關閉清單
-5. 點擊「一鍵關閉前 3 個」
-6. 確認關閉的是最少使用的分頁
+### Scenario 2: Clean Up Old Tabs
+1. Open 20 tabs
+2. Browse a few tabs randomly
+3. Open popup
+4. Check suggested close list
+5. Click "Close First 3 Tabs"
+6. Confirm least recently used tabs were closed
 
-### 場景 3: 停用後重新啟用
-1. 啟用管理並設定配額
-2. 停用管理
-3. 開啟超過配額的分頁 → 不會被關閉
-4. 重新啟用管理
-5. Badge 顯示負數或 0
-6. 嘗試開啟新分頁 → 被關閉
+### Scenario 3: Disable and Re-enable
+1. Enable management and set quota
+2. Disable management
+3. Open tabs beyond quota → Not closed
+4. Re-enable management
+5. Badge shows negative or 0
+6. Try to open new tab → Closes
 
-## 問題回報
+## Issue Reporting
 
-如發現任何問題，請記錄：
-- 瀏覽器版本
-- 擴充功能版本
-- 重現步驟
-- 預期行為 vs 實際行為
-- 截圖或錯誤訊息
+If you find any issues, please record:
+- Browser version
+- Extension version
+- Steps to reproduce
+- Expected behavior vs actual behavior
+- Screenshots or error messages

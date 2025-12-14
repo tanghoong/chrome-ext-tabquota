@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="zh-TW">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -227,14 +227,14 @@
   
   <div class="settings">
     <div class="setting-row">
-      <span class="setting-label">啟用管理</span>
+      <span class="setting-label">Enable Management</span>
       <label class="toggle-switch">
         <input type="checkbox" id="enableToggle">
         <span class="slider"></span>
       </label>
     </div>
     <div class="setting-row">
-      <span class="setting-label">最大分頁數</span>
+      <span class="setting-label">Max Tabs</span>
       <select id="maxTabsSelect">
         <option value="10">10</option>
         <option value="15">15</option>
@@ -247,21 +247,21 @@
   
   <div class="status">
     <div class="status-item">
-      <span>目前分頁數：</span>
+      <span>Current Tabs:</span>
       <span class="status-value" id="currentTabs">0</span>
     </div>
     <div class="status-item">
-      <span>剩餘名額：</span>
+      <span>Remaining Quota:</span>
       <span class="status-value" id="remainingQuota">0</span>
     </div>
   </div>
   
-  <div class="section-title">建議關閉清單</div>
+  <div class="section-title">Suggested Tabs to Close</div>
   <div class="suggested-list" id="suggestedList">
-    <div class="empty-message">無建議關閉的分頁</div>
+    <div class="empty-message">No tabs suggested for closing</div>
   </div>
   
-  <button class="btn btn-primary" id="closeFirstThree">一鍵關閉前 3 個</button>
+  <button class="btn btn-primary" id="closeFirstThree">Close First 3 Tabs</button>
   
   <script src="popup.js"></script>
 </body>

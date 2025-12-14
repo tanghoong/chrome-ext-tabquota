@@ -1,131 +1,131 @@
-# 安裝指南 (Installation Guide)
+# Installation Guide
 
-## 方式一：從源碼安裝 (Development Mode)
+## Method 1: Install from Source (Development Mode)
 
-1. **下載專案**
+1. **Download the project**
    ```bash
    git clone https://github.com/tanghoong/chrome-ext-tabquota.git
    cd chrome-ext-tabquota
    ```
 
-2. **開啟 Chrome 擴充功能頁面**
-   - 在 Chrome 瀏覽器中輸入：`chrome://extensions/`
-   - 或點擊「設定」> 「更多工具」> 「擴充功能」
+2. **Open Chrome Extensions page**
+   - Navigate to `chrome://extensions/` in Chrome browser
+   - Or click "Settings" > "More Tools" > "Extensions"
 
-3. **啟用開發人員模式**
-   - 在擴充功能頁面右上角，開啟「開發人員模式」開關
+3. **Enable Developer mode**
+   - Toggle "Developer mode" switch in the top right corner
 
-4. **載入擴充功能**
-   - 點擊「載入未封裝項目」按鈕
-   - 選擇 `chrome-ext-tabquota` 資料夾
-   - 確認載入成功
+4. **Load the extension**
+   - Click "Load unpacked" button
+   - Select the `chrome-ext-tabquota` folder
+   - Confirm successful loading
 
-5. **確認安裝**
-   - 擴充功能圖示應出現在瀏覽器工具列
-   - 圖示顯示為藍色圓形，中間有 # 符號
+5. **Verify installation**
+   - Extension icon should appear in the browser toolbar
+   - Icon displays as a blue circle with # symbol in the center
 
-## 使用前設定
+## Initial Setup
 
-1. **點擊擴充功能圖示** 開啟彈出視窗
+1. **Click the extension icon** to open the popup
 
-2. **設定最大分頁數**
-   - 從下拉選單選擇 10、15、20、25 或 30
-   - 預設值：20
+2. **Set maximum tab count**
+   - Select from dropdown: 10, 15, 20, 25, or 30
+   - Default value: 20
 
-3. **啟用管理功能**
-   - 切換「啟用管理」開關至開啟狀態
-   - 啟用後，系統會自動監控並管理分頁數量
+3. **Enable management**
+   - Toggle "Enable Management" switch to ON
+   - Once enabled, the system will automatically monitor and manage tab count
 
-## 檔案清單
+## File List
 
-確保以下檔案都存在：
+Ensure the following files exist:
 
 ```
 chrome-ext-tabquota/
-├── manifest.json          # 擴充功能設定檔
-├── popup.html            # 彈出視窗介面
-├── popup.js              # 彈出視窗邏輯
-├── background.js         # 背景服務工作者
-├── icons/                # 圖示資料夾
-│   ├── icon16.png       # 16x16 圖示
-│   ├── icon32.png       # 32x32 圖示
-│   ├── icon48.png       # 48x48 圖示
-│   └── icon128.png      # 128x128 圖示
-├── README.md            # 專案說明
-├── TESTING.md           # 測試指南
-└── INSTALL.md           # 本安裝指南
+├── manifest.json          # Extension configuration
+├── popup.html            # Popup interface
+├── popup.js              # Popup logic
+├── background.js         # Background service worker
+├── icons/                # Icon folder
+│   ├── icon16.png       # 16x16 icon
+│   ├── icon32.png       # 32x32 icon
+│   ├── icon48.png       # 48x48 icon
+│   └── icon128.png      # 128x128 icon
+├── README.md            # Project documentation
+├── TESTING.md           # Testing guide
+└── INSTALL.md           # This installation guide
 ```
 
-## 疑難排解
+## Troubleshooting
 
-### 無法載入擴充功能
+### Cannot Load Extension
 
-**錯誤訊息：「資訊清單檔案遺失或無法讀取」**
-- 確認選擇了正確的資料夾（包含 manifest.json 的資料夾）
-- 確認所有檔案都已正確下載
+**Error: "Manifest file is missing or unreadable"**
+- Confirm you selected the correct folder (containing manifest.json)
+- Verify all files are downloaded correctly
 
-**錯誤訊息：「權限被拒絕」**
-- 確認檔案權限設定正確
-- 嘗試複製專案到其他位置
+**Error: "Permission denied"**
+- Check file permissions are set correctly
+- Try copying the project to a different location
 
-### 擴充功能圖示未顯示
+### Extension Icon Not Showing
 
-1. 檢查圖示檔案是否存在於 `icons/` 資料夾
-2. 重新載入擴充功能：
-   - 前往 `chrome://extensions/`
-   - 點擊擴充功能下的「重新載入」按鈕
+1. Check if icon files exist in the `icons/` folder
+2. Reload the extension:
+   - Go to `chrome://extensions/`
+   - Click the "Reload" button under the extension
 
-### Badge 數字未顯示
+### Badge Number Not Showing
 
-1. 確認已啟用管理功能
-2. 嘗試開啟/關閉幾個分頁
-3. 檢查瀏覽器控制台是否有錯誤訊息
+1. Confirm management is enabled
+2. Try opening/closing a few tabs
+3. Check browser console for error messages
 
-### 無法關閉分頁
+### Cannot Close Tabs
 
-**可能原因：**
-- 該分頁為固定分頁且為目前活動分頁
-- 瀏覽器權限設定問題
+**Possible causes:**
+- Tab is pinned and currently active
+- Browser permission settings issue
 
-**解決方式：**
-1. 檢查擴充功能權限：`chrome://extensions/` → 點擊「詳細資料」
-2. 確認「tabs」權限已啟用
-3. 重新載入擴充功能
+**Solutions:**
+1. Check extension permissions: `chrome://extensions/` → Click "Details"
+2. Verify "tabs" permission is enabled
+3. Reload the extension
 
-## 更新擴充功能
+## Updating the Extension
 
-當有新版本時：
+When a new version is available:
 
-1. 拉取最新程式碼
+1. Pull the latest code
    ```bash
    cd chrome-ext-tabquota
    git pull origin main
    ```
 
-2. 重新載入擴充功能
-   - 前往 `chrome://extensions/`
-   - 找到 Tab Quota 擴充功能
-   - 點擊「重新載入」按鈕（圓形箭頭圖示）
+2. Reload the extension
+   - Go to `chrome://extensions/`
+   - Find Tab Quota extension
+   - Click the "Reload" button (circular arrow icon)
 
-## 解除安裝
+## Uninstallation
 
-1. 前往 `chrome://extensions/`
-2. 找到 Tab Quota 擴充功能
-3. 點擊「移除」按鈕
-4. 確認解除安裝
+1. Go to `chrome://extensions/`
+2. Find Tab Quota extension
+3. Click "Remove" button
+4. Confirm uninstallation
 
-## 技術需求
+## Technical Requirements
 
-- Chrome 瀏覽器版本：88 或更新版本（支援 Manifest V3）
-- 作業系統：Windows、macOS 或 Linux
-- 權限需求：
-  - `tabs`：讀取和管理分頁
-  - `storage`：儲存設定
-  - `notifications`：顯示通知
+- Chrome browser version: 88 or newer (Manifest V3 support)
+- Operating System: Windows, macOS, or Linux
+- Required permissions:
+  - `tabs`: Read and manage tabs
+  - `storage`: Store settings
+  - `notifications`: Display notifications
 
-## 支援
+## Support
 
-如遇到問題，請：
-1. 查看 [測試指南](TESTING.md)
-2. 檢查瀏覽器控制台錯誤訊息
-3. 在 GitHub 上提交 Issue
+If you encounter any issues, please:
+1. Check the [Testing Guide](TESTING.md)
+2. Review browser console error messages
+3. Submit an issue on GitHub

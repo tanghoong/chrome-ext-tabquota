@@ -1,6 +1,6 @@
-# 架構說明 (Architecture)
+# Architecture
 
-## 系統架構
+## System Architecture
 
 ```
 ┌─────────────────────────────────────────────────────┐
@@ -33,66 +33,66 @@
 └─────────────────────────────────────────────────────┘
 ```
 
-## 組件說明
+## Component Description
 
 ### 1. Popup UI (popup.html + popup.js)
 
-**功能：**
-- 提供使用者介面
-- 設定管理（啟用/停用、最大分頁數）
-- 顯示目前狀態（分頁數、剩餘名額）
-- 建議關閉清單
-- 分頁操作（切換、關閉）
+**Features:**
+- Provides user interface
+- Settings management (enable/disable, max tabs)
+- Displays current status (tab count, remaining quota)
+- Suggested close list
+- Tab operations (switch, close)
 
-**關鍵功能：**
+**Key Functions:**
 ```javascript
-loadSettings()          // 載入儲存的設定
-saveSettings()          // 儲存設定到 chrome.storage
-updateStatus()          // 更新狀態顯示
-getSuggestedTabs()      // 取得建議關閉的分頁
-updateSuggestedList()   // 更新建議清單 UI
-closeFirstThree()       // 關閉前三個建議分頁
+loadSettings()          // Load saved settings
+saveSettings()          // Save settings to chrome.storage
+updateStatus()          // Update status display
+getSuggestedTabs()      // Get suggested tabs to close
+updateSuggestedList()   // Update suggested list UI
+closeFirstThree()       // Close first three suggested tabs
 ```
 
-**資料流：**
-1. 使用者變更設定 → 儲存到 chrome.storage
-2. 通知 background.js 設定已變更
-3. 監聽 tab 事件 → 更新 UI（使用 debouncing）
+**Data Flow:**
+1. User changes settings → Save to chrome.storage
+2. Notify background.js of settings change
+3. Listen to tab events → Update UI (with debouncing)
 
 ### 2. Background Service Worker (background.js)
 
-**功能：**
-- 監聽所有分頁事件
-- 計算分頁總數（包含 pinned）
-- 更新 badge 顯示
-- 執行配額限制
-- 發送通知
+**Features:**
+- Monitor all tab events
+- Calculate total tab count (including pinned)
+- Update badge display
+- Enforce quota limits
+- Send notifications
 
-**關鍵功能：**
+**Key Functions:**
 ```javascript
-getSettings()      // 取得設定
-getTabCount()      // 計算所有分頁數
-updateBadge()      // 更新 badge 文字和顏色
-enforceQuota()     // 執行配額限制
+getSettings()      // Get settings
+getTabCount()      // Count all tabs
+updateBadge()      // Update badge text and color
+enforceQuota()     // Enforce quota limits
 ```
 
-**事件監聽：**
-- `chrome.tabs.onCreated` → 新分頁建立時
-- `chrome.tabs.onRemoved` → 分頁關閉時
-- `chrome.tabs.onUpdated` → 分頁更新時
-- `chrome.storage.onChanged` → 設定變更時
-- `chrome.runtime.onMessage` → 接收訊息
+**Event Listeners:**
+- \`chrome.tabs.onCreated\` → When new tab is created
+- \`chrome.tabs.onRemoved\` → When tab is closed
+- \`chrome.tabs.onUpdated\` → When tab is updated
+- \`chrome.storage.onChanged\` → When settings change
+- \`chrome.runtime.onMessage\` → Receive messages
 
 ### 3. Storage Schema
 
 ```javascript
 {
-  enabled: boolean,      // 是否啟用管理
-  maxTabs: number       // 最大分頁數 (10-30)
+  enabled: boolean,      // Whether management is enabled
+  maxTabs: number       // Maximum tab count (10-30)
 }
 ```
 
-預設值：
+Default values:
 ```javascript
 {
   enabled: false,
@@ -100,9 +100,9 @@ enforceQuota()     // 執行配額限制
 }
 ```
 
-## 核心邏輯
+## Core Logic
 
-### Badge 顏色邏輯
+### Badge Color Logic
 
 ```javascript
 if (enabled) {
@@ -114,121 +114,121 @@ if (enabled) {
 }
 ```
 
-### 配額執行流程
+### Quota Enforcement Flow
 
 ```
-1. 使用者開啟新分頁
-2. chrome.tabs.onCreated 事件觸發
-3. 更新 badge
-4. 檢查是否啟用管理 && 分頁數 >= 最大值
-5. 如果是：
-   a. 關閉新分頁
-   b. 顯示通知
-6. 如果否：
-   允許開啟
+1. User opens new tab
+2. chrome.tabs.onCreated event triggers
+3. Update badge
+4. Check if enabled && tab count >= max
+5. If yes:
+   a. Close new tab
+   b. Show notification
+6. If no:
+   Allow opening
 ```
 
-### 建議關閉清單排序
+### Suggested Close List Sorting
 
 ```javascript
 tabs
-  .filter(tab => !tab.active)           // 排除活動分頁
+  .filter(tab => !tab.active)           // Exclude active tabs
   .sort((a, b) => {
     if (a.pinned !== b.pinned) {
-      return a.pinned ? 1 : -1;         // 優先非 pinned
+      return a.pinned ? 1 : -1;         // Non-pinned first
     }
-    return (a.lastAccessed || 0) - (b.lastAccessed || 0);  // 舊的在前
+    return (a.lastAccessed || 0) - (b.lastAccessed || 0);  // Oldest first
   })
 ```
 
-**排序優先級：**
-1. 非活動分頁
-2. 非固定分頁優先
-3. 最後存取時間較早的優先
+**Sorting Priority:**
+1. Non-active tabs
+2. Non-pinned tabs first
+3. Earlier last accessed time first
 
-## API 使用
+## API Usage
 
 ### Chrome Extension APIs
 
 **chrome.tabs**
 ```javascript
-chrome.tabs.query({})              // 取得所有分頁
-chrome.tabs.get(tabId)             // 取得特定分頁
-chrome.tabs.remove(tabId)          // 關閉分頁
-chrome.tabs.update(tabId, props)   // 更新分頁
-chrome.windows.update(windowId, props) // 更新視窗
+chrome.tabs.query({})              // Get all tabs
+chrome.tabs.get(tabId)             // Get specific tab
+chrome.tabs.remove(tabId)          // Close tab
+chrome.tabs.update(tabId, props)   // Update tab
+chrome.windows.update(windowId, props) // Update window
 ```
 
 **chrome.storage**
 ```javascript
-chrome.storage.sync.get(keys)      // 讀取設定
-chrome.storage.sync.set(items)     // 儲存設定
+chrome.storage.sync.get(keys)      // Read settings
+chrome.storage.sync.set(items)     // Save settings
 ```
 
 **chrome.action**
 ```javascript
-chrome.action.setBadgeText({text}) // 設定 badge 文字
-chrome.action.setBadgeBackgroundColor({color}) // 設定 badge 顏色
+chrome.action.setBadgeText({text}) // Set badge text
+chrome.action.setBadgeBackgroundColor({color}) // Set badge color
 ```
 
 **chrome.notifications**
 ```javascript
-chrome.notifications.create({...}) // 顯示通知
+chrome.notifications.create({...}) // Display notification
 ```
 
 **chrome.runtime**
 ```javascript
-chrome.runtime.sendMessage({...})  // 發送訊息
-chrome.runtime.onMessage.addListener(...) // 監聽訊息
+chrome.runtime.sendMessage({...})  // Send message
+chrome.runtime.onMessage.addListener(...) // Listen to messages
 ```
 
-## 效能優化
+## Performance Optimization
 
 ### 1. Debouncing
-- Popup UI 更新使用 100ms debounce
-- 避免頻繁的 API 呼叫
+- Popup UI updates use 100ms debounce
+- Avoids frequent API calls
 
-### 2. 事件處理
-- 使用 async/await 避免阻塞
-- 錯誤處理確保穩定性
+### 2. Event Handling
+- Use async/await to avoid blocking
+- Error handling ensures stability
 
-### 3. 資料同步
-- 使用 chrome.storage.sync 跨裝置同步
-- 最小化儲存資料量
+### 3. Data Synchronization
+- Use chrome.storage.sync for cross-device sync
+- Minimize stored data size
 
-## 安全性考量
+## Security Considerations
 
-### 權限最小化
-- 僅請求必要權限：tabs, storage, notifications
-- 不請求 `<all_urls>` 等廣泛權限
+### Minimal Permissions
+- Only request necessary permissions: tabs, storage, notifications
+- Do not request broad permissions like \`<all_urls>\`
 
-### 資料保護
-- 設定資料儲存在 chrome.storage.sync
-- 不傳送資料到外部伺服器
-- 不存取分頁內容
+### Data Protection
+- Settings data stored in chrome.storage.sync
+- No data sent to external servers
+- No access to tab content
 
-### 錯誤處理
-- Try-catch 包裹所有 API 呼叫
-- 優雅處理分頁不存在的情況
-- Console log 記錄錯誤但不影響運作
+### Error Handling
+- Try-catch wraps all API calls
+- Gracefully handle missing tabs
+- Console log errors without affecting operation
 
-## 限制與已知問題
+## Limitations & Known Issues
 
-### 限制
-1. 無法阻止系統分頁（如 chrome:// 頁面）
-2. 無法阻止某些特殊分頁（如擴充功能頁面）
-3. 短時間內快速開啟多個分頁可能有延遲
+### Limitations
+1. Cannot block system tabs (like chrome:// pages)
+2. Cannot block certain special tabs (like extension pages)
+3. Brief delay possible when rapidly opening multiple tabs
 
-### 解決方案
-- 100ms 延遲確保分頁完全建立後再檢查
-- 檢查分頁存在性再執行關閉
-- 清楚的錯誤處理
+### Solutions
+- 100ms delay ensures tab is fully created before checking
+- Check tab existence before closing
+- Clear error handling
 
-## 未來改進方向
+## Future Improvements
 
-1. **白名單功能**：允許特定網域不受限制
-2. **排程功能**：不同時段設定不同配額
-3. **統計功能**：記錄分頁使用情況
-4. **匯出/匯入設定**：方便備份
-5. **國際化**：支援多語言
-6. **深色模式**：自動偵測系統主題
+1. **Whitelist Feature**: Allow specific domains to be unrestricted
+2. **Scheduling**: Different quotas for different times of day
+3. **Statistics**: Track tab usage patterns
+4. **Export/Import Settings**: Easy backup
+5. **Internationalization**: Multi-language support
+6. **Dark Mode**: Auto-detect system theme

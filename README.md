@@ -1,53 +1,53 @@
 # Tab Quota - Chrome Extension
 
-一個用於管理分頁配額的 Chrome 擴充功能，使用 Manifest V3 開發。
+A Chrome extension for managing tab quotas, built with Manifest V3.
 
-## 功能特色
+## Features
 
-- ✅ 啟用/停用分頁管理
-- ✅ 設定最大分頁數 (10-30)
-- ✅ 即時顯示剩餘配額 (badge 標記)
-- ✅ 自動關閉超過配額的新分頁
-- ✅ 建議關閉清單（排除活動分頁，優先關閉非固定分頁，按最後存取時間排序）
-- ✅ 切換到指定分頁
-- ✅ 一鍵關閉前 3 個建議分頁
+- ✅ Enable/disable tab management
+- ✅ Set maximum tab count (10-30)
+- ✅ Real-time remaining quota display (badge indicator)
+- ✅ Auto-close tabs exceeding quota
+- ✅ Suggested close list (excludes active tabs, prioritizes non-pinned tabs, sorted by last accessed time)
+- ✅ Switch to specific tab
+- ✅ Close first 3 suggested tabs with one click
 
-## 安裝方式
+## Installation
 
-1. 下載或 clone 此專案
-2. 開啟 Chrome 瀏覽器，輸入 `chrome://extensions/`
-3. 開啟右上角的「開發人員模式」
-4. 點擊「載入未封裝項目」
-5. 選擇此專案的資料夾
-6. 完成！擴充功能圖示會出現在工具列
+1. Download or clone this project
+2. Open Chrome browser and navigate to `chrome://extensions/`
+3. Enable "Developer mode" in the top right corner
+4. Click "Load unpacked"
+5. Select the project folder
+6. Done! The extension icon will appear in the toolbar
 
-## 使用方式
+## Usage
 
-1. 點擊工具列上的擴充功能圖示
-2. 使用切換開關啟用分頁管理
-3. 選擇最大分頁數限制
-4. 系統會自動監控並管理分頁數量
-5. 當分頁數達到上限時，新開分頁會被自動關閉並顯示通知
-6. 查看建議關閉清單，可以切換或關閉指定分頁
-7. 使用「一鍵關閉前 3 個」快速釋放配額
+1. Click the extension icon in the toolbar
+2. Use the toggle switch to enable tab management
+3. Select the maximum tab limit
+4. The system will automatically monitor and manage tab count
+5. When the tab limit is reached, new tabs will be automatically closed with a notification
+6. View the suggested close list to switch to or close specific tabs
+7. Use "Close First 3 Tabs" to quickly free up quota
 
-## 技術規格
+## Technical Specifications
 
 - Chrome Extension Manifest V3
-- 使用 chrome.storage.sync 儲存設定
-- 使用 chrome.tabs API 監控分頁
-- 使用 chrome.notifications API 顯示通知
-- 使用 chrome.action.setBadgeText 顯示剩餘配額
+- Uses chrome.storage.sync for settings storage
+- Uses chrome.tabs API for tab monitoring
+- Uses chrome.notifications API for notifications
+- Uses chrome.action.setBadgeText to display remaining quota
 
-## 檔案結構
+## File Structure
 
 ```
 chrome-ext-tabquota/
-├── manifest.json       # 擴充功能設定檔
-├── popup.html         # 彈出視窗 UI
-├── popup.js           # 彈出視窗邏輯
-├── background.js      # 背景服務工作者
-├── icons/             # 圖示檔案
+├── manifest.json       # Extension configuration
+├── popup.html         # Popup UI
+├── popup.js           # Popup logic
+├── background.js      # Background service worker
+├── icons/             # Icon files
 │   ├── icon16.png
 │   ├── icon32.png
 │   ├── icon48.png

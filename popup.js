@@ -63,7 +63,7 @@ async function updateSuggestedList() {
   const listElement = document.getElementById('suggestedList');
   
   if (suggestedTabs.length === 0) {
-    listElement.innerHTML = '<div class="empty-message">無建議關閉的分頁</div>';
+    listElement.innerHTML = '<div class="empty-message">No tabs suggested for closing</div>';
     document.getElementById('closeFirstThree').disabled = true;
     return;
   }
@@ -85,7 +85,7 @@ async function updateSuggestedList() {
     
     const switchBtn = document.createElement('button');
     switchBtn.className = 'btn btn-switch';
-    switchBtn.textContent = '切換';
+    switchBtn.textContent = 'Switch';
     switchBtn.addEventListener('click', async () => {
       await chrome.tabs.update(tab.id, { active: true });
       await chrome.windows.update(tab.windowId, { focused: true });
@@ -94,7 +94,7 @@ async function updateSuggestedList() {
     
     const closeBtn = document.createElement('button');
     closeBtn.className = 'btn btn-close';
-    closeBtn.textContent = '關閉';
+    closeBtn.textContent = 'Close';
     closeBtn.addEventListener('click', async () => {
       await chrome.tabs.remove(tab.id);
       await updateSuggestedList();

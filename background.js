@@ -71,8 +71,8 @@ async function enforceQuota(tabId) {
         await chrome.notifications.create({
           type: 'basic',
           iconUrl: 'icons/icon128.png',
-          title: 'Tab Quota 已達上限',
-          message: `已達到最大分頁數限制 (${settings.maxTabs})，新分頁已被關閉。`,
+          title: 'Tab Quota Limit Reached',
+          message: `Maximum tab limit (${settings.maxTabs}) reached. New tab has been closed.`,
           priority: 2
         });
       }
