@@ -124,26 +124,27 @@ async function closeFirstThree() {
   }
 }
 
+// Debounce function to avoid excessive updates
+let updateTimeout;
+function scheduleUpdate() {
+  if (updateTimeout) {
+    clearTimeout(updateTimeout);
+  }
+  updateTimeout = setTimeout(() => {
+    updateStatus();
+    updateSuggestedList();
+  }, 100);
+}
+
 // Event listeners
 document.getElementById('enableToggle').addEventListener('change', saveSettings);
 document.getElementById('maxTabsSelect').addEventListener('change', saveSettings);
 document.getElementById('closeFirstThree').addEventListener('click', closeFirstThree);
 
-// Listen for tab changes to update status
-chrome.tabs.onCreated.addListener(() => {
-  updateStatus();
-  updateSuggestedList();
-});
-
-chrome.tabs.onRemoved.addListener(() => {
-  updateStatus();
-  updateSuggestedList();
-});
-
-chrome.tabs.onUpdated.addListener(() => {
-  updateStatus();
-  updateSuggestedList();
-});
+// Listen for tab changes to update status (with debouncing)
+chrome.tabs.onCreated.addListener(scheduleUpdate);
+chrome.tabs.onRemoved.addListener(scheduleUpdate);
+chrome.tabs.onUpdated.addListener(scheduleUpdate);
 
 // Initialize on load
 loadSettings();

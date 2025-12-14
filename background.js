@@ -62,17 +62,22 @@ async function enforceQuota(tabId) {
   if (tabCount >= settings.maxTabs) {
     // Remove the newly created tab
     try {
-      await chrome.tabs.remove(tabId);
-      
-      // Show notification
-      await chrome.notifications.create({
-        type: 'basic',
-        iconUrl: 'icons/icon128.png',
-        title: 'Tab Quota 已達上限',
-        message: `已達到最大分頁數限制 (${settings.maxTabs})，新分頁已被關閉。`,
-        priority: 2
-      });
+      // Check if tab still exists before removing
+      const tab = await chrome.tabs.get(tabId);
+      if (tab) {
+        await chrome.tabs.remove(tabId);
+        
+        // Show notification
+        await chrome.notifications.create({
+          type: 'basic',
+          iconUrl: 'icons/icon128.png',
+          title: 'Tab Quota 已達上限',
+          message: `已達到最大分頁數限制 (${settings.maxTabs})，新分頁已被關閉。`,
+          priority: 2
+        });
+      }
     } catch (error) {
+      // Tab may have been closed already, which is fine
       console.error('Error removing tab:', error);
     }
   }
