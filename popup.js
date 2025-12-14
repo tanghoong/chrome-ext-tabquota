@@ -80,15 +80,27 @@ async function updateSuggestedList() {
   if (suggestedTabs.length === 0) {
     listElement.innerHTML = '<div class="empty-message">No tabs suggested for closing</div>';
     document.getElementById('closeFirstThree').disabled = true;
+    document.getElementById('closeFirstThree').textContent = 'Close Tabs';
     return;
   }
   
   listElement.innerHTML = '';
-  document.getElementById('closeFirstThree').disabled = false;
+  listElement.setAttribute('role', 'list');
+  
+  // Update button based on number of tabs
+  const closeBtn = document.getElementById('closeFirstThree');
+  closeBtn.disabled = false;
+  const numToClose = Math.min(3, suggestedTabs.length);
+  if (numToClose === 1) {
+    closeBtn.textContent = 'Close 1 Tab';
+  } else {
+    closeBtn.textContent = `Close First ${numToClose} Tabs`;
+  }
   
   suggestedTabs.forEach((tab, index) => {
     const tabItem = document.createElement('div');
     tabItem.className = 'tab-item';
+    tabItem.setAttribute('role', 'listitem');
     
     const tabTitle = document.createElement('div');
     tabTitle.className = 'tab-title';
@@ -101,19 +113,31 @@ async function updateSuggestedList() {
     const switchBtn = document.createElement('button');
     switchBtn.className = 'btn btn-switch';
     switchBtn.textContent = 'Switch';
+    switchBtn.setAttribute('aria-label', `Switch to tab: ${tab.title || 'Untitled'}`);
     switchBtn.addEventListener('click', async () => {
-      await chrome.tabs.update(tab.id, { active: true });
-      await chrome.windows.update(tab.windowId, { focused: true });
-      window.close();
+      try {
+        await chrome.tabs.update(tab.id, { active: true });
+        await chrome.windows.update(tab.windowId, { focused: true });
+        window.close();
+      } catch (error) {
+        console.error('Failed to switch to tab:', error);
+        alert('Failed to switch to the tab. It may have been closed.');
+      }
     });
     
     const closeBtn = document.createElement('button');
     closeBtn.className = 'btn btn-close';
     closeBtn.textContent = 'Close';
+    closeBtn.setAttribute('aria-label', `Close tab: ${tab.title || 'Untitled'}`);
     closeBtn.addEventListener('click', async () => {
-      await chrome.tabs.remove(tab.id);
-      await updateSuggestedList();
-      await updateStatus();
+      try {
+        await chrome.tabs.remove(tab.id);
+        await updateSuggestedList();
+        await updateStatus();
+      } catch (error) {
+        console.error('Failed to close tab:', error);
+        alert('Failed to close the tab. It may have already been closed.');
+      }
     });
     
     tabActions.appendChild(switchBtn);
@@ -126,16 +150,35 @@ async function updateSuggestedList() {
   });
 }
 
-// Close first three suggested tabs
-async function closeFirstThree() {
+// Close up to three suggested tabs
+async function closeUpToThreeTabs() {
   const suggestedTabs = await getSuggestedTabs();
   const tabsToClose = suggestedTabs.slice(0, 3);
+  const closeBtn = document.getElementById('closeFirstThree');
   
   if (tabsToClose.length > 0) {
     const tabIds = tabsToClose.map(tab => tab.id);
-    await chrome.tabs.remove(tabIds);
-    await updateSuggestedList();
-    await updateStatus();
+    
+    try {
+      await chrome.tabs.remove(tabIds);
+      
+      // Provide visual feedback
+      const originalText = closeBtn.textContent;
+      closeBtn.textContent = 'Closed!';
+      closeBtn.disabled = true;
+      
+      await updateSuggestedList();
+      await updateStatus();
+      
+      setTimeout(() => {
+        // Button text will be updated by updateSuggestedList
+      }, 1000);
+    } catch (error) {
+      console.error('Failed to close tabs:', error);
+      alert('Failed to close some tabs. They may have already been closed.');
+      await updateSuggestedList();
+      await updateStatus();
+    }
   }
 }
 
@@ -154,7 +197,7 @@ function scheduleUpdate() {
 // Event listeners
 document.getElementById('enableToggle').addEventListener('change', saveSettings);
 document.getElementById('maxTabsSelect').addEventListener('change', saveSettings);
-document.getElementById('closeFirstThree').addEventListener('click', closeFirstThree);
+document.getElementById('closeFirstThree').addEventListener('click', closeUpToThreeTabs);
 
 // Listen for tab changes to update status (with debouncing)
 chrome.tabs.onCreated.addListener(scheduleUpdate);
@@ -163,6 +206,10 @@ chrome.tabs.onUpdated.addListener(scheduleUpdate);
 
 // Remove tab listeners when popup is closed
 window.addEventListener('unload', () => {
+  if (updateTimeout) {
+    clearTimeout(updateTimeout);
+    updateTimeout = null;
+  }
   chrome.tabs.onCreated.removeListener(scheduleUpdate);
   chrome.tabs.onRemoved.removeListener(scheduleUpdate);
   chrome.tabs.onUpdated.removeListener(scheduleUpdate);

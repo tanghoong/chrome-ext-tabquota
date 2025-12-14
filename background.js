@@ -77,19 +77,24 @@ async function enforceQuota(tabId) {
         });
       }
     } catch (error) {
-      // Tab may have been closed already, which is fine
-      console.error('Error removing tab:', error);
+      // Only suppress error if tab is already closed
+      if (error && typeof error.message === 'string' && error.message.match(/No tab with id/i)) {
+        // Tab may have been closed already, which is fine
+      } else {
+        // Unexpected error, log it
+        console.error('Unexpected error removing tab:', error);
+      }
     }
   }
 }
 
 // Listen for tab created
 chrome.tabs.onCreated.addListener(async (tab) => {
-  // First update badge
-  await updateBadge();
-  
-  // Then check if we need to enforce quota
+  // Check if we need to enforce quota first
   await enforceQuota(tab.id);
+  
+  // Then update badge after enforcement
+  await updateBadge();
 });
 
 // Listen for tab removed
