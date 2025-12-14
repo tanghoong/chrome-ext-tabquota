@@ -32,10 +32,17 @@ async function updateStatus() {
   
   const result = await chrome.storage.sync.get({ maxTabs: 20 });
   const maxTabs = result.maxTabs;
-  const remaining = Math.max(0, maxTabs - currentTabs);
+  const remaining = maxTabs - currentTabs;
   
   document.getElementById('currentTabs').textContent = currentTabs;
-  document.getElementById('remainingQuota').textContent = remaining;
+  const remainingQuotaElem = document.getElementById('remainingQuota');
+  if (remaining < 0) {
+    remainingQuotaElem.textContent = `Over quota by ${-remaining}`;
+    remainingQuotaElem.classList.add('over-quota');
+  } else {
+    remainingQuotaElem.textContent = remaining;
+    remainingQuotaElem.classList.remove('over-quota');
+  }
 }
 
 // Get suggested tabs to close
