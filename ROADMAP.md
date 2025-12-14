@@ -142,7 +142,7 @@ We welcome contributions! If you'd like to work on any of these features:
 1. Check the [GitHub Issues](https://github.com/tanghoong/chrome-ext-tabquota/issues) for existing discussions
 2. Open a new issue to discuss your idea
 3. Fork the repository and create a pull request
-4. Follow the contribution guidelines in CONTRIBUTING.md
+4. Ensure your code follows the existing style and patterns
 
 ## Feedback
 
