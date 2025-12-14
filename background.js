@@ -89,10 +89,7 @@ chrome.tabs.onCreated.addListener(async (tab) => {
   await updateBadge();
   
   // Then check if we need to enforce quota
-  // We need to wait a bit to ensure the tab is fully created
-  setTimeout(async () => {
-    await enforceQuota(tab.id);
-  }, 100);
+  await enforceQuota(tab.id);
 });
 
 // Listen for tab removed
