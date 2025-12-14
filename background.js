@@ -59,7 +59,7 @@ async function enforceQuota(tabId) {
   
   const tabCount = await getTabCount();
   
-  if (tabCount >= settings.maxTabs) {
+  if (tabCount > settings.maxTabs) {
     // Remove the newly created tab
     try {
       // Check if tab still exists before removing
