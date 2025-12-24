@@ -25,9 +25,9 @@ function applyTheme(theme) {
   document.getElementById('themeAuto').classList.toggle('active', theme === THEMES.AUTO);
   
   // Update aria-checked for accessibility
-  document.getElementById('themeLight').setAttribute('aria-checked', theme === THEMES.LIGHT);
-  document.getElementById('themeDark').setAttribute('aria-checked', theme === THEMES.DARK);
-  document.getElementById('themeAuto').setAttribute('aria-checked', theme === THEMES.AUTO);
+  document.getElementById('themeLight').setAttribute('aria-checked', String(theme === THEMES.LIGHT));
+  document.getElementById('themeDark').setAttribute('aria-checked', String(theme === THEMES.DARK));
+  document.getElementById('themeAuto').setAttribute('aria-checked', String(theme === THEMES.AUTO));
 }
 
 // Save theme preference
@@ -51,13 +51,18 @@ async function loadTheme() {
   });
 }
 
+// Maximum length for sanitized text.
+// Chrome tab titles are typically < 100 characters; we use 200 as a safe upper bound
+// to reduce DoS risk from excessively long strings while preserving normal titles.
+const MAX_SANITIZED_TEXT_LENGTH = 200;
+
 // Sanitize text for safe display (prevents XSS when used with textContent)
 function sanitizeText(text) {
   if (typeof text !== 'string') {
     return '';
   }
   // Truncate very long strings to prevent DoS
-  return text.slice(0, 500);
+  return text.slice(0, MAX_SANITIZED_TEXT_LENGTH);
 }
 
 // Show toast notification (non-blocking alternative to alert)
@@ -71,8 +76,8 @@ function showToast(message, type = 'error', duration = 3000) {
     clearTimeout(toastTimeout);
   }
   
-  // Set message and type
-  toast.textContent = message;
+  // Set message and type (sanitize for defense in depth)
+  toast.textContent = sanitizeText(message);
   toast.className = `toast ${type}`;
   
   // Show toast
@@ -109,6 +114,7 @@ async function saveSettings() {
   const maxTabs = parseInt(maxTabsValue, 10);
   if (isNaN(maxTabs) || maxTabs < 10 || maxTabs > 30) {
     console.error('Invalid maxTabs value');
+    showToast('Invalid maximum tabs value. Please choose a number between 10 and 30.', 'error');
     return;
   }
   
@@ -169,7 +175,7 @@ async function getSuggestedTabs() {
 
 // Create favicon element for a tab
 function createFaviconElement(tab) {
-  if (tab.favIconUrl && tab.favIconUrl.startsWith('http')) {
+  if (tab.favIconUrl && (tab.favIconUrl.startsWith('http://') || tab.favIconUrl.startsWith('https://'))) {
     const favicon = document.createElement('img');
     favicon.className = 'tab-favicon';
     favicon.src = tab.favIconUrl;
@@ -178,7 +184,10 @@ function createFaviconElement(tab) {
     // Handle broken images
     favicon.onerror = function() {
       const placeholder = createFaviconPlaceholder();
-      this.parentNode.replaceChild(placeholder, this);
+      const parent = this.parentNode;
+      if (parent) {
+        parent.replaceChild(placeholder, this);
+      }
     };
     return favicon;
   }
@@ -344,11 +353,15 @@ chrome.tabs.onCreated.addListener(scheduleUpdate);
 chrome.tabs.onRemoved.addListener(scheduleUpdate);
 chrome.tabs.onUpdated.addListener(scheduleUpdate);
 
-// Remove tab listeners when popup is closed
+// Remove tab listeners and clear timeouts when popup is closed
 window.addEventListener('unload', () => {
   if (updateTimeout) {
     clearTimeout(updateTimeout);
     updateTimeout = null;
+  }
+  if (toastTimeout) {
+    clearTimeout(toastTimeout);
+    toastTimeout = null;
   }
   chrome.tabs.onCreated.removeListener(scheduleUpdate);
   chrome.tabs.onRemoved.removeListener(scheduleUpdate);
