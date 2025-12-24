@@ -60,6 +60,32 @@ function sanitizeText(text) {
   return text.slice(0, 500);
 }
 
+// Show toast notification (non-blocking alternative to alert)
+let toastTimeout;
+function showToast(message, type = 'error', duration = 3000) {
+  const toast = document.getElementById('toast');
+  if (!toast) return;
+  
+  // Clear any existing timeout
+  if (toastTimeout) {
+    clearTimeout(toastTimeout);
+  }
+  
+  // Set message and type
+  toast.textContent = message;
+  toast.className = `toast ${type}`;
+  
+  // Show toast
+  requestAnimationFrame(() => {
+    toast.classList.add('show');
+  });
+  
+  // Hide after duration
+  toastTimeout = setTimeout(() => {
+    toast.classList.remove('show');
+  }, duration);
+}
+
 // Load settings and update UI
 async function loadSettings() {
   const result = await chrome.storage.sync.get({
@@ -233,7 +259,7 @@ async function updateSuggestedList() {
         window.close();
       } catch (error) {
         console.error('Failed to switch to tab:', error);
-        alert('Failed to switch to the tab. It may have been closed.');
+        showToast('Failed to switch to the tab. It may have been closed.', 'error');
       }
     });
     
@@ -248,7 +274,9 @@ async function updateSuggestedList() {
         await updateStatus();
       } catch (error) {
         console.error('Failed to close tab:', error);
-        alert('Failed to close the tab. It may have already been closed.');
+        showToast('Failed to close the tab. It may have already been closed.', 'error');
+        await updateSuggestedList();
+        await updateStatus();
       }
     });
     
@@ -282,7 +310,7 @@ async function closeUpToThreeTabs() {
       await updateStatus();
     } catch (error) {
       console.error('Failed to close tabs:', error);
-      alert('Failed to close some tabs. They may have already been closed.');
+      showToast('Failed to close some tabs. They may have already been closed.', 'error');
       await updateSuggestedList();
       await updateStatus();
     }
