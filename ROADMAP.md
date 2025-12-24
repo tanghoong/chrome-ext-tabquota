@@ -29,8 +29,8 @@ This document outlines planned features and improvements for the Tab Quota Chrom
 - [ ] Visual charts and graphs
 
 ### UI Improvements
-- [ ] Dark mode support
-- [ ] Auto-detect system theme preference
+- [x] Dark mode support
+- [x] Auto-detect system theme preference
 - [ ] Improved popup layout
 - [ ] Keyboard shortcuts for common actions
 - [ ] Customizable UI colors

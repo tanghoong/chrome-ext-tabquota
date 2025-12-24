@@ -1,3 +1,65 @@
+// Theme Management
+const THEMES = {
+  LIGHT: 'light',
+  DARK: 'dark',
+  AUTO: 'auto'
+};
+
+// Get system theme preference
+function getSystemTheme() {
+  return window.matchMedia('(prefers-color-scheme: dark)').matches ? THEMES.DARK : THEMES.LIGHT;
+}
+
+// Apply theme to document
+function applyTheme(theme) {
+  let effectiveTheme = theme;
+  if (theme === THEMES.AUTO) {
+    effectiveTheme = getSystemTheme();
+  }
+  
+  document.documentElement.setAttribute('data-theme', effectiveTheme);
+  
+  // Update button active states
+  document.getElementById('themeLight').classList.toggle('active', theme === THEMES.LIGHT);
+  document.getElementById('themeDark').classList.toggle('active', theme === THEMES.DARK);
+  document.getElementById('themeAuto').classList.toggle('active', theme === THEMES.AUTO);
+  
+  // Update aria-checked for accessibility
+  document.getElementById('themeLight').setAttribute('aria-checked', theme === THEMES.LIGHT);
+  document.getElementById('themeDark').setAttribute('aria-checked', theme === THEMES.DARK);
+  document.getElementById('themeAuto').setAttribute('aria-checked', theme === THEMES.AUTO);
+}
+
+// Save theme preference
+async function saveTheme(theme) {
+  await chrome.storage.sync.set({ theme });
+  applyTheme(theme);
+}
+
+// Load and apply saved theme
+async function loadTheme() {
+  const result = await chrome.storage.sync.get({ theme: THEMES.AUTO });
+  applyTheme(result.theme);
+  
+  // Listen for system theme changes when in auto mode
+  window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
+    chrome.storage.sync.get({ theme: THEMES.AUTO }).then(result => {
+      if (result.theme === THEMES.AUTO) {
+        applyTheme(THEMES.AUTO);
+      }
+    });
+  });
+}
+
+// Sanitize text for safe display (prevents XSS when used with textContent)
+function sanitizeText(text) {
+  if (typeof text !== 'string') {
+    return '';
+  }
+  // Truncate very long strings to prevent DoS
+  return text.slice(0, 500);
+}
+
 // Load settings and update UI
 async function loadSettings() {
   const result = await chrome.storage.sync.get({
@@ -15,7 +77,14 @@ async function loadSettings() {
 // Save settings to chrome.storage
 async function saveSettings() {
   const enabled = document.getElementById('enableToggle').checked;
-  const maxTabs = parseInt(document.getElementById('maxTabsSelect').value);
+  const maxTabsValue = document.getElementById('maxTabsSelect').value;
+  
+  // Validate maxTabs is a valid number in expected range
+  const maxTabs = parseInt(maxTabsValue, 10);
+  if (isNaN(maxTabs) || maxTabs < 10 || maxTabs > 30) {
+    console.error('Invalid maxTabs value');
+    return;
+  }
   
   await chrome.storage.sync.set({ enabled, maxTabs });
   
@@ -34,13 +103,13 @@ async function updateStatus() {
   const maxTabs = result.maxTabs;
   const remaining = maxTabs - currentTabs;
   
-  document.getElementById('currentTabs').textContent = currentTabs;
+  document.getElementById('currentTabs').textContent = String(currentTabs);
   const remainingQuotaElem = document.getElementById('remainingQuota');
   if (remaining < 0) {
     remainingQuotaElem.textContent = `Over quota by ${-remaining}`;
     remainingQuotaElem.classList.add('over-quota');
   } else {
-    remainingQuotaElem.textContent = remaining;
+    remainingQuotaElem.textContent = String(remaining);
     remainingQuotaElem.classList.remove('over-quota');
   }
 }
@@ -72,19 +141,53 @@ async function getSuggestedTabs() {
   return suggested;
 }
 
+// Create favicon element for a tab
+function createFaviconElement(tab) {
+  if (tab.favIconUrl && tab.favIconUrl.startsWith('http')) {
+    const favicon = document.createElement('img');
+    favicon.className = 'tab-favicon';
+    favicon.src = tab.favIconUrl;
+    favicon.alt = '';
+    favicon.loading = 'lazy';
+    // Handle broken images
+    favicon.onerror = function() {
+      const placeholder = createFaviconPlaceholder();
+      this.parentNode.replaceChild(placeholder, this);
+    };
+    return favicon;
+  }
+  return createFaviconPlaceholder();
+}
+
+// Create favicon placeholder for tabs without favicons
+function createFaviconPlaceholder() {
+  const placeholder = document.createElement('div');
+  placeholder.className = 'tab-favicon-placeholder';
+  placeholder.textContent = '📄';
+  placeholder.setAttribute('aria-hidden', 'true');
+  return placeholder;
+}
+
 // Update suggested list UI
 async function updateSuggestedList() {
   const suggestedTabs = await getSuggestedTabs();
   const listElement = document.getElementById('suggestedList');
   
   if (suggestedTabs.length === 0) {
-    listElement.innerHTML = '<div class="empty-message">No tabs suggested for closing</div>';
+    // Clear and create empty message safely
+    listElement.textContent = '';
+    const emptyMsg = document.createElement('div');
+    emptyMsg.className = 'empty-message';
+    emptyMsg.textContent = 'No tabs suggested for closing';
+    listElement.appendChild(emptyMsg);
+    
     document.getElementById('closeFirstThree').disabled = true;
     document.getElementById('closeFirstThree').textContent = 'Close Tabs';
     return;
   }
   
-  listElement.innerHTML = '';
+  // Clear existing content safely
+  listElement.textContent = '';
   listElement.setAttribute('role', 'list');
   
   // Update button based on number of tabs
@@ -97,15 +200,24 @@ async function updateSuggestedList() {
     closeBtn.textContent = `Close First ${numToClose} Tabs`;
   }
   
-  suggestedTabs.forEach((tab, index) => {
+  suggestedTabs.forEach((tab) => {
     const tabItem = document.createElement('div');
     tabItem.className = 'tab-item';
     tabItem.setAttribute('role', 'listitem');
     
+    const tabInfo = document.createElement('div');
+    tabInfo.className = 'tab-info';
+    
+    // Add favicon
+    const favicon = createFaviconElement(tab);
+    tabInfo.appendChild(favicon);
+    
     const tabTitle = document.createElement('div');
     tabTitle.className = 'tab-title';
-    tabTitle.textContent = tab.title || 'Untitled';
-    tabTitle.title = tab.title || 'Untitled';
+    const titleText = sanitizeText(tab.title) || 'Untitled';
+    tabTitle.textContent = titleText;
+    tabTitle.title = titleText;
+    tabInfo.appendChild(tabTitle);
     
     const tabActions = document.createElement('div');
     tabActions.className = 'tab-actions';
@@ -113,7 +225,7 @@ async function updateSuggestedList() {
     const switchBtn = document.createElement('button');
     switchBtn.className = 'btn btn-switch';
     switchBtn.textContent = 'Switch';
-    switchBtn.setAttribute('aria-label', `Switch to tab: ${tab.title || 'Untitled'}`);
+    switchBtn.setAttribute('aria-label', `Switch to tab: ${titleText}`);
     switchBtn.addEventListener('click', async () => {
       try {
         await chrome.tabs.update(tab.id, { active: true });
@@ -125,11 +237,11 @@ async function updateSuggestedList() {
       }
     });
     
-    const closeBtn = document.createElement('button');
-    closeBtn.className = 'btn btn-close';
-    closeBtn.textContent = 'Close';
-    closeBtn.setAttribute('aria-label', `Close tab: ${tab.title || 'Untitled'}`);
-    closeBtn.addEventListener('click', async () => {
+    const closeBtnItem = document.createElement('button');
+    closeBtnItem.className = 'btn btn-close';
+    closeBtnItem.textContent = 'Close';
+    closeBtnItem.setAttribute('aria-label', `Close tab: ${titleText}`);
+    closeBtnItem.addEventListener('click', async () => {
       try {
         await chrome.tabs.remove(tab.id);
         await updateSuggestedList();
@@ -141,9 +253,9 @@ async function updateSuggestedList() {
     });
     
     tabActions.appendChild(switchBtn);
-    tabActions.appendChild(closeBtn);
+    tabActions.appendChild(closeBtnItem);
     
-    tabItem.appendChild(tabTitle);
+    tabItem.appendChild(tabInfo);
     tabItem.appendChild(tabActions);
     
     listElement.appendChild(tabItem);
@@ -163,16 +275,11 @@ async function closeUpToThreeTabs() {
       await chrome.tabs.remove(tabIds);
       
       // Provide visual feedback
-      const originalText = closeBtn.textContent;
       closeBtn.textContent = 'Closed!';
       closeBtn.disabled = true;
       
       await updateSuggestedList();
       await updateStatus();
-      
-      setTimeout(() => {
-        // Button text will be updated by updateSuggestedList
-      }, 1000);
     } catch (error) {
       console.error('Failed to close tabs:', error);
       alert('Failed to close some tabs. They may have already been closed.');
@@ -194,7 +301,12 @@ function scheduleUpdate() {
   }, 100);
 }
 
-// Event listeners
+// Theme button event listeners
+document.getElementById('themeLight').addEventListener('click', () => saveTheme(THEMES.LIGHT));
+document.getElementById('themeDark').addEventListener('click', () => saveTheme(THEMES.DARK));
+document.getElementById('themeAuto').addEventListener('click', () => saveTheme(THEMES.AUTO));
+
+// Settings event listeners
 document.getElementById('enableToggle').addEventListener('change', saveSettings);
 document.getElementById('maxTabsSelect').addEventListener('change', saveSettings);
 document.getElementById('closeFirstThree').addEventListener('click', closeUpToThreeTabs);
@@ -214,5 +326,7 @@ window.addEventListener('unload', () => {
   chrome.tabs.onRemoved.removeListener(scheduleUpdate);
   chrome.tabs.onUpdated.removeListener(scheduleUpdate);
 });
+
 // Initialize on load
+loadTheme();
 loadSettings();

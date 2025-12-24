@@ -5,12 +5,62 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Tab Quota</title>
   <style>
+    :root {
+      /* Light theme (default) */
+      --bg-primary: #ffffff;
+      --bg-secondary: #f5f5f5;
+      --bg-hover: #f0f0f0;
+      --text-primary: #333333;
+      --text-secondary: #555555;
+      --text-muted: #999999;
+      --border-color: #e0e0e0;
+      --toggle-off: #cccccc;
+      --toggle-on: #4CAF50;
+      --btn-switch: #2196F3;
+      --btn-switch-hover: #1976D2;
+      --btn-close: #f44336;
+      --btn-close-hover: #d32f2f;
+      --btn-primary: #FF9800;
+      --btn-primary-hover: #F57C00;
+      --btn-disabled: #cccccc;
+      --over-quota: #f44336;
+      --scrollbar-track: #f1f1f1;
+      --scrollbar-thumb: #c1c1c1;
+      --scrollbar-thumb-hover: #a1a1a1;
+    }
+
+    [data-theme="dark"] {
+      --bg-primary: #1e1e1e;
+      --bg-secondary: #2d2d2d;
+      --bg-hover: #3d3d3d;
+      --text-primary: #e0e0e0;
+      --text-secondary: #b0b0b0;
+      --text-muted: #808080;
+      --border-color: #404040;
+      --toggle-off: #555555;
+      --toggle-on: #4CAF50;
+      --btn-switch: #2196F3;
+      --btn-switch-hover: #42a5f5;
+      --btn-close: #ef5350;
+      --btn-close-hover: #f44336;
+      --btn-primary: #FF9800;
+      --btn-primary-hover: #ffa726;
+      --btn-disabled: #555555;
+      --over-quota: #ef5350;
+      --scrollbar-track: #2d2d2d;
+      --scrollbar-thumb: #555555;
+      --scrollbar-thumb-hover: #666666;
+    }
+
     body {
       width: 400px;
       min-height: 300px;
       padding: 16px;
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
       margin: 0;
+      background-color: var(--bg-primary);
+      color: var(--text-primary);
+      transition: background-color 0.3s, color 0.3s;
     }
     
     .header {
@@ -19,13 +69,51 @@
       align-items: center;
       margin-bottom: 16px;
       padding-bottom: 12px;
-      border-bottom: 1px solid #e0e0e0;
+      border-bottom: 1px solid var(--border-color);
     }
     
     .title {
       font-size: 18px;
       font-weight: 600;
-      color: #333;
+      color: var(--text-primary);
+    }
+
+    .theme-selector {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .theme-btn {
+      background: none;
+      border: 1px solid var(--border-color);
+      border-radius: 4px;
+      padding: 4px 6px;
+      cursor: pointer;
+      font-size: 14px;
+      color: var(--text-secondary);
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 28px;
+      height: 28px;
+    }
+
+    .theme-btn:hover {
+      background-color: var(--bg-hover);
+      border-color: var(--text-secondary);
+    }
+
+    .theme-btn.active {
+      background-color: var(--btn-switch);
+      border-color: var(--btn-switch);
+      color: white;
+    }
+
+    .theme-btn:focus {
+      outline: 2px solid var(--btn-switch);
+      outline-offset: 1px;
     }
     
     .settings {
@@ -43,7 +131,7 @@
     
     .setting-label {
       font-size: 14px;
-      color: #555;
+      color: var(--text-secondary);
     }
     
     .toggle-switch {
@@ -66,7 +154,7 @@
       left: 0;
       right: 0;
       bottom: 0;
-      background-color: #ccc;
+      background-color: var(--toggle-off);
       transition: background-color 0.4s;
       border-radius: 24px;
     }
@@ -84,28 +172,41 @@
     }
     
     input:checked + .slider {
-      background-color: #4CAF50;
+      background-color: var(--toggle-on);
     }
     
     input:checked + .slider:before {
       transform: translateX(24px);
     }
+
+    .toggle-switch input:focus + .slider {
+      box-shadow: 0 0 0 2px var(--btn-switch);
+    }
     
     select {
       padding: 6px 10px;
-      border: 1px solid #ccc;
+      border: 1px solid var(--border-color);
       border-radius: 4px;
       font-size: 14px;
       cursor: pointer;
+      background-color: var(--bg-primary);
+      color: var(--text-primary);
+      transition: background-color 0.3s, color 0.3s, border-color 0.3s;
+    }
+
+    select:focus {
+      outline: 2px solid var(--btn-switch);
+      outline-offset: 1px;
     }
     
     .status {
-      background-color: #f5f5f5;
+      background-color: var(--bg-secondary);
       padding: 12px;
       border-radius: 6px;
       margin-bottom: 16px;
       font-size: 14px;
-      color: #333;
+      color: var(--text-primary);
+      transition: background-color 0.3s;
     }
     
     .status-item {
@@ -121,20 +222,43 @@
     .status-value {
       font-weight: 600;
     }
+
+    .status-value.over-quota {
+      color: var(--over-quota);
+    }
     
     .section-title {
       font-size: 15px;
       font-weight: 600;
       margin-bottom: 10px;
-      color: #333;
+      color: var(--text-primary);
     }
     
     .suggested-list {
       max-height: 200px;
       overflow-y: auto;
-      border: 1px solid #e0e0e0;
+      border: 1px solid var(--border-color);
       border-radius: 4px;
       margin-bottom: 12px;
+      transition: border-color 0.3s;
+    }
+
+    .suggested-list::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    .suggested-list::-webkit-scrollbar-track {
+      background: var(--scrollbar-track);
+      border-radius: 4px;
+    }
+
+    .suggested-list::-webkit-scrollbar-thumb {
+      background: var(--scrollbar-thumb);
+      border-radius: 4px;
+    }
+
+    .suggested-list::-webkit-scrollbar-thumb:hover {
+      background: var(--scrollbar-thumb-hover);
     }
     
     .tab-item {
@@ -142,8 +266,9 @@
       justify-content: space-between;
       align-items: center;
       padding: 8px 10px;
-      border-bottom: 1px solid #e0e0e0;
+      border-bottom: 1px solid var(--border-color);
       font-size: 13px;
+      transition: background-color 0.2s;
     }
     
     .tab-item:last-child {
@@ -151,7 +276,37 @@
     }
     
     .tab-item:hover {
-      background-color: #f9f9f9;
+      background-color: var(--bg-hover);
+    }
+
+    .tab-info {
+      display: flex;
+      align-items: center;
+      flex: 1;
+      min-width: 0;
+      margin-right: 8px;
+    }
+
+    .tab-favicon {
+      width: 16px;
+      height: 16px;
+      margin-right: 8px;
+      flex-shrink: 0;
+      border-radius: 2px;
+    }
+
+    .tab-favicon-placeholder {
+      width: 16px;
+      height: 16px;
+      margin-right: 8px;
+      flex-shrink: 0;
+      background-color: var(--border-color);
+      border-radius: 2px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 10px;
+      color: var(--text-muted);
     }
     
     .tab-title {
@@ -159,13 +314,13 @@
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
-      color: #333;
-      margin-right: 8px;
+      color: var(--text-primary);
     }
     
     .tab-actions {
       display: flex;
       gap: 6px;
+      flex-shrink: 0;
     }
     
     .btn {
@@ -174,55 +329,77 @@
       border-radius: 4px;
       cursor: pointer;
       font-size: 12px;
-      transition: background-color 0.2s;
+      transition: background-color 0.2s, transform 0.1s;
+    }
+
+    .btn:active {
+      transform: scale(0.95);
+    }
+
+    .btn:focus {
+      outline: 2px solid var(--btn-switch);
+      outline-offset: 1px;
     }
     
     .btn-switch {
-      background-color: #2196F3;
+      background-color: var(--btn-switch);
       color: white;
     }
     
     .btn-switch:hover {
-      background-color: #1976D2;
+      background-color: var(--btn-switch-hover);
     }
     
     .btn-close {
-      background-color: #f44336;
+      background-color: var(--btn-close);
       color: white;
     }
     
     .btn-close:hover {
-      background-color: #d32f2f;
+      background-color: var(--btn-close-hover);
     }
     
     .btn-primary {
       width: 100%;
       padding: 10px;
-      background-color: #FF9800;
+      background-color: var(--btn-primary);
       color: white;
       font-weight: 600;
     }
     
     .btn-primary:hover {
-      background-color: #F57C00;
+      background-color: var(--btn-primary-hover);
     }
     
     .btn-primary:disabled {
-      background-color: #ccc;
+      background-color: var(--btn-disabled);
       cursor: not-allowed;
+      transform: none;
     }
     
     .empty-message {
       text-align: center;
       padding: 20px;
-      color: #999;
+      color: var(--text-muted);
       font-size: 13px;
+    }
+
+    /* Accessibility: reduce motion for users who prefer it */
+    @media (prefers-reduced-motion: reduce) {
+      * {
+        transition: none !important;
+      }
     }
   </style>
 </head>
 <body>
   <div class="header">
     <div class="title">Tab Quota Manager</div>
+    <div class="theme-selector" role="radiogroup" aria-label="Theme selection">
+      <button class="theme-btn" id="themeLight" title="Light theme" aria-label="Light theme" role="radio" aria-checked="false">☀️</button>
+      <button class="theme-btn" id="themeDark" title="Dark theme" aria-label="Dark theme" role="radio" aria-checked="false">🌙</button>
+      <button class="theme-btn" id="themeAuto" title="Auto (system)" aria-label="Auto theme based on system preference" role="radio" aria-checked="false">🔄</button>
+    </div>
   </div>
   
   <div class="settings">

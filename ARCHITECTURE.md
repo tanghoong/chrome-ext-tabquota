@@ -43,6 +43,7 @@
 - Displays current status (tab count, remaining quota)
 - Suggested close list
 - Tab operations (switch, close)
+- Theme management (light, dark, auto)
 
 **Key Functions:**
 ```javascript
@@ -51,7 +52,11 @@ saveSettings()          // Save settings to chrome.storage
 updateStatus()          // Update status display
 getSuggestedTabs()      // Get suggested tabs to close
 updateSuggestedList()   // Update suggested list UI
-closeFirstThree()       // Close first three suggested tabs
+closeUpToThreeTabs()    // Close first three suggested tabs
+loadTheme()             // Load and apply saved theme
+saveTheme()             // Save theme preference
+applyTheme()            // Apply theme to document
+sanitizeText()          // Sanitize text for safe display
 ```
 
 **Data Flow:**
@@ -88,7 +93,8 @@ enforceQuota()     // Enforce quota limits
 ```javascript
 {
   enabled: boolean,      // Whether management is enabled
-  maxTabs: number       // Maximum tab count (10-30)
+  maxTabs: number,       // Maximum tab count (10-30)
+  theme: string         // Theme preference: 'light', 'dark', or 'auto'
 }
 ```
 
@@ -96,7 +102,8 @@ Default values:
 ```javascript
 {
   enabled: false,
-  maxTabs: 20
+  maxTabs: 20,
+  theme: 'auto'
 }
 ```
 
@@ -224,6 +231,13 @@ chrome.runtime.onMessage.addListener(...) // Listen to messages
 - Check tab existence before closing
 - Clear error handling
 
+## Implemented Improvements
+
+1. **Theme Support**: Light, dark, and auto (system) theme options
+2. **Tab Favicons**: Display favicons in suggested close list
+3. **Input Validation**: Sanitize text input and validate settings
+4. **Accessibility**: ARIA labels, reduced motion support, keyboard focus states
+
 ## Future Improvements
 
 1. **Whitelist Feature**: Allow specific domains to be unrestricted
@@ -231,4 +245,3 @@ chrome.runtime.onMessage.addListener(...) // Listen to messages
 3. **Statistics**: Track tab usage patterns
 4. **Export/Import Settings**: Easy backup
 5. **Internationalization**: Multi-language support
-6. **Dark Mode**: Auto-detect system theme
