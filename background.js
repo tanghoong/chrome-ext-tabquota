@@ -1,7 +1,8 @@
 // Default settings
 const DEFAULT_SETTINGS = {
   enabled: false,
-  maxTabs: 20
+  maxTabs: 20,
+  theme: 'auto'
 };
 
 // Initialize extension
